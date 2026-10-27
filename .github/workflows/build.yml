@@ -14,11 +14,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Criar Projeto e Compilar APK Automaticamente
+      - name: Criar Projeto e Compilar APK
         run: |
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+
           # 1. Cria a estrutura de pastas
           mkdir -p app/src/main/java/com/mistfile/netlan app/src/main/res/layout app/src/main/res/values
 
@@ -293,7 +293,7 @@ jobs:
           }
           EOF
 
-          # 7. Compilação direta de alta velocidade com as ferramentas do Android
+          # 7. Compilação direta usando o SDK nativo do Ubuntu
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
           PLATFORM=$(ls -d $ANDROID_HOME/platforms/android-* | tail -n 1)/android.jar
 
