@@ -14,26 +14,32 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Criar Projeto e Compilar APK
+      - name: Criar Projeto e Compilar APK Compatível
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
           export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
 
-          # 1. Cria a estrutura de pastas
           mkdir -p app/src/main/java/com/mistfile/netlan app/src/main/res/layout app/src/main/res/values
 
-          # 2. Cria o AndroidManifest.xml
+          # Manifesto com suporte a Android 8 até Android 15
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
               package="com.mistfile.netlan">
+              
+              <uses-sdk android:minSdkVersion="26" android:targetSdkVersion="34" />
+
               <uses-permission android:name="android.permission.INTERNET" />
               <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
               <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
               <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
               <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
               <uses-permission android:name="android.permission.WAKE_LOCK" />
-              <application android:label="NetLAN Offline">
+
+              <application 
+                  android:label="NetLAN Offline"
+                  android:icon="@android:drawable/sym_def_app_icon"
+                  android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -50,59 +56,22 @@ jobs:
           </manifest>
           EOF
 
-          # 3. Cria o layout visual
+          # Layout
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:padding="20dp"
-              android:background="#0b0f19"
-              android:gravity="center">
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="NetLAN Offline"
-                  android:textColor="#38bdf8"
-                  android:textSize="22sp" />
-              <TextView
-                  android:id="@+id/text_status"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="Status: Desconectado"
-                  android:textColor="#10b981"
-                  android:layout_marginTop="20dp" />
-              <EditText
-                  android:id="@+id/edit_game_port"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:text="7777"
-                  android:textColor="#ffffff"
-                  android:layout_marginTop="10dp" />
-              <Button
-                  android:id="@+id/btn_host"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:text="CRIAR SALA LAN (HOST)"
-                  android:layout_marginTop="20dp" />
-              <Button
-                  android:id="@+id/btn_client"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:text="CONECTAR (CLIENTE)"
-                  android:layout_marginTop="10dp" />
-              <Button
-                  android:id="@+id/btn_stop"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:text="DESCONECTAR"
-                  android:visibility="gone"
-                  android:layout_marginTop="10dp" />
+              android:layout_width="match_parent" android:layout_height="match_parent"
+              android:orientation="vertical" android:padding="20dp" android:background="#0b0f19" android:gravity="center">
+              <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="NetLAN Offline" android:textColor="#38bdf8" android:textSize="22sp" />
+              <TextView android:id="@+id/text_status" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Status: Desconectado" android:textColor="#10b981" android:layout_marginTop="20dp" />
+              <EditText android:id="@+id/edit_game_port" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="7777" android:textColor="#ffffff" android:layout_marginTop="10dp" />
+              <Button android:id="@+id/btn_host" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="CRIAR SALA LAN (HOST)" android:layout_marginTop="20dp" />
+              <Button android:id="@+id/btn_client" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="CONECTAR (CLIENTE)" android:layout_marginTop="10dp" />
+              <Button android:id="@+id/btn_stop" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="DESCONECTAR" android:visibility="gone" android:layout_marginTop="10dp" />
           </LinearLayout>
           EOF
 
-          # 4. Cria o MainActivity.java
+          # Java: MainActivity
           cat << 'EOF' > app/src/main/java/com/mistfile/netlan/MainActivity.java
           package com.mistfile.netlan;
           import android.app.Activity;
@@ -176,7 +145,7 @@ jobs:
           }
           EOF
 
-          # 5. Cria o LocalLanVpnService.java
+          # Java: LocalLanVpnService
           cat << 'EOF' > app/src/main/java/com/mistfile/netlan/LocalLanVpnService.java
           package com.mistfile.netlan;
           import android.content.Intent;
@@ -238,7 +207,7 @@ jobs:
           }
           EOF
 
-          # 6. Cria o LanBroadcastRelay.java
+          # Java: LanBroadcastRelay
           cat << 'EOF' > app/src/main/java/com/mistfile/netlan/LanBroadcastRelay.java
           package com.mistfile.netlan;
           import android.app.Service;
@@ -293,7 +262,7 @@ jobs:
           }
           EOF
 
-          # 7. Compilação direta usando o SDK nativo do Ubuntu
+          # Compilação e alinhamento de bytes
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
           PLATFORM=$(ls -d $ANDROID_HOME/platforms/android-* | tail -n 1)/android.jar
 
@@ -302,14 +271,15 @@ jobs:
           $BUILD_TOOLS/aapt2 link -I $PLATFORM --manifest app/src/main/AndroidManifest.xml --java build/gen -o build/base.apk build/res.zip
           javac -d build/obj -cp $PLATFORM $(find app/src/main/java build/gen -name "*.java")
           $BUILD_TOOLS/d8 --lib $PLATFORM --output build/apk/ $(find build/obj -name "*.class")
-          cp build/base.apk NetLAN-Offline.apk
-          cd build/apk && zip -u ../../NetLAN-Offline.apk classes.dex && cd ../..
+          cp build/base.apk NetLAN-Raw.apk
+          cd build/apk && zip -u ../../NetLAN-Raw.apk classes.dex && cd ../..
 
-          # Assinatura do APK
+          # Alinhamento 4-bytes e assinatura compatível com Android 8 até 15
+          $BUILD_TOOLS/zipalign -p -f 4 NetLAN-Raw.apk NetLAN-Aligned.apk
           keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android,O=Android,C=US"
-          $BUILD_TOOLS/apksigner sign --ks debug.keystore --ks-pass pass:android --out NetLAN-Final.apk NetLAN-Offline.apk
+          $BUILD_TOOLS/apksigner sign --ks debug.keystore --ks-pass pass:android --out NetLAN-Final.apk NetLAN-Aligned.apk
 
-      - name: Baixar o APK Compilado
+      - name: Baixar o APK Compatível
         uses: actions/upload-artifact@v4
         with:
           name: NetLAN-Offline-App
