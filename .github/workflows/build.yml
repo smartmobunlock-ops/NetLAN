@@ -14,14 +14,56 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Criar Projeto e Compilar APK Compatível
+      - name: Criar Projeto com Ícone Personalizado e Compilar
         run: |
           export ANDROID_HOME=/usr/local/lib/android/sdk
           export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
 
-          mkdir -p app/src/main/java/com/mistfile/netlan app/src/main/res/layout app/src/main/res/values
+          # 1. Cria a estrutura de pastas incluindo drawables para o ícone
+          mkdir -p app/src/main/java/com/mistfile/netlan app/src/main/res/layout app/src/main/res/values app/src/main/res/drawable
 
-          # Manifesto com suporte a Android 8 até Android 15
+          # 2. Ícone Oficial do NetLAN (Wi-Fi Hotspot Neon Azul)
+          cat << 'EOF' > app/src/main/res/drawable/ic_launcher.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp"
+              android:height="108dp"
+              android:viewportWidth="108"
+              android:viewportHeight="108">
+              <!-- Fundo Escuro Redondo -->
+              <path
+                  android:fillColor="#090d16"
+                  android:pathData="M0,0h108v108h-108z"/>
+              <!-- Borda de Rede Azul -->
+              <path
+                  android:fillColor="#0369a1"
+                  android:pathData="M54,14 A40,40 0 1 0 54,94 A40,40 0 1 0 54,14 Z"/>
+              <path
+                  android:fillColor="#0f172a"
+                  android:pathData="M54,18 A36,36 0 1 0 54,90 A36,36 0 1 0 54,18 Z"/>
+              <!-- Ponto Central do Hotspot -->
+              <path
+                  android:fillColor="#38bdf8"
+                  android:pathData="M54,64 A6,6 0 1 0 54,76 A6,6 0 1 0 54,64 Z"/>
+              <!-- Ondas de Sinal Wi-Fi LAN -->
+              <path
+                  android:strokeColor="#38bdf8"
+                  android:strokeWidth="5"
+                  android:strokeLineCap="round"
+                  android:pathData="M39,52 A20,20 0 0 1 69,52"/>
+              <path
+                  android:strokeColor="#0ea5e9"
+                  android:strokeWidth="5"
+                  android:strokeLineCap="round"
+                  android:pathData="M29,40 A32,32 0 0 1 79,40"/>
+              <path
+                  android:strokeColor="#0284c7"
+                  android:strokeWidth="5"
+                  android:strokeLineCap="round"
+                  android:pathData="M19,28 A44,44 0 0 1 89,28"/>
+          </vector>
+          EOF
+
+          # 3. Manifesto apontando para o novo ícone @drawable/ic_launcher
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -38,7 +80,8 @@ jobs:
 
               <application 
                   android:label="NetLAN Offline"
-                  android:icon="@android:drawable/sym_def_app_icon"
+                  android:icon="@drawable/ic_launcher"
+                  android:roundIcon="@drawable/ic_launcher"
                   android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
@@ -56,7 +99,7 @@ jobs:
           </manifest>
           EOF
 
-          # Layout
+          # 4. Layout
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -71,7 +114,7 @@ jobs:
           </LinearLayout>
           EOF
 
-          # Java: MainActivity
+          # 5. Código Java
           cat << 'EOF' > app/src/main/java/com/mistfile/netlan/MainActivity.java
           package com.mistfile.netlan;
           import android.app.Activity;
@@ -145,7 +188,6 @@ jobs:
           }
           EOF
 
-          # Java: LocalLanVpnService
           cat << 'EOF' > app/src/main/java/com/mistfile/netlan/LocalLanVpnService.java
           package com.mistfile.netlan;
           import android.content.Intent;
@@ -207,7 +249,6 @@ jobs:
           }
           EOF
 
-          # Java: LanBroadcastRelay
           cat << 'EOF' > app/src/main/java/com/mistfile/netlan/LanBroadcastRelay.java
           package com.mistfile.netlan;
           import android.app.Service;
@@ -262,7 +303,7 @@ jobs:
           }
           EOF
 
-          # Compilação e alinhamento de bytes
+          # 6. Compilação, montagem e inclusão dos drawables do ícone
           BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
           PLATFORM=$(ls -d $ANDROID_HOME/platforms/android-* | tail -n 1)/android.jar
 
@@ -274,12 +315,12 @@ jobs:
           cp build/base.apk NetLAN-Raw.apk
           cd build/apk && zip -u ../../NetLAN-Raw.apk classes.dex && cd ../..
 
-          # Alinhamento 4-bytes e assinatura compatível com Android 8 até 15
+          # 7. Alinhamento e assinatura do APK
           $BUILD_TOOLS/zipalign -p -f 4 NetLAN-Raw.apk NetLAN-Aligned.apk
           keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android,O=Android,C=US"
           $BUILD_TOOLS/apksigner sign --ks debug.keystore --ks-pass pass:android --out NetLAN-Final.apk NetLAN-Aligned.apk
 
-      - name: Baixar o APK Compatível
+      - name: Baixar o APK com Ícone
         uses: actions/upload-artifact@v4
         with:
           name: NetLAN-Offline-App
