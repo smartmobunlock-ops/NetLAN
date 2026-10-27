@@ -5,14 +5,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Baixar arquivos
+      - name: Baixar código
         uses: actions/checkout@v4
 
-      - name: Extrair arquivos
+      - name: Localizar e extrair arquivos do projeto
         run: |
-          if [ -f NetLAN-Projeto-Android.zip ]; then
-            unzip -o NetLAN-Projeto-Android.zip || true
-          fi
+          find . -name "*.zip" -exec unzip -o {} \; || true
+          ls -R
 
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -23,24 +22,40 @@ jobs:
       - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Compilar APK Direto
+      - name: Gerar chave de assinatura e compilar APK
         run: |
-          BUILD_TOOLS=$ANDROID_HOME/build-tools/34.0.0
-          PLATFORM=$ANDROID_HOME/platforms/android-34/android.jar
+          BUILD_TOOLS=$(ls -d $ANDROID_HOME/build-tools/* | tail -n 1)
+          PLATFORM=$(ls -d $ANDROID_HOME/platforms/android-* | tail -n 1)/android.jar
+          echo "Usando Build Tools: $BUILD_TOOLS"
+          echo "Usando Platform: $PLATFORM"
+
+          # 1. Encontrar o AndroidManifest.xml em qualquer pasta
+          MANIFEST=$(find . -name "AndroidManifest.xml" | head -n 1)
+          RES_DIR=$(find . -type d -name "res" | head -n 1)
           
           mkdir -p build/gen build/obj build/apk
-          $BUILD_TOOLS/aapt2 compile --dir app/src/main/res -o build/res.zip || true
-          $BUILD_TOOLS/aapt2 link -I $PLATFORM --manifest app/src/main/AndroidManifest.xml --java build/gen -o build/base.apk build/res.zip || true
-          javac -d build/obj -cp $PLATFORM $(find app/src/main/java build/gen -name "*.java") || true
-          $BUILD_TOOLS/d8 --lib $PLATFORM --output build/apk/ $(find build/obj -name "*.class") || true
+          
+          # 2. Compilar recursos e gerar base.apk
+          $BUILD_TOOLS/aapt2 compile --dir $RES_DIR -o build/res.zip
+          $BUILD_TOOLS/aapt2 link -I $PLATFORM --manifest $MANIFEST --java build/gen -o build/base.apk build/res.zip
+          
+          # 3. Compilar arquivos Java
+          javac -d build/obj -cp $PLATFORM $(find . build/gen -name "*.java")
+          
+          # 4. Gerar arquivo DEX
+          $BUILD_TOOLS/d8 --lib $PLATFORM --output build/apk/ $(find build/obj -name "*.class")
+          
+          # 5. Montar o APK final
           cp build/base.apk NetLAN-Offline.apk
-          cd build/apk && zip -u ../../NetLAN-Offline.apk classes.dex || true
+          cd build/apk && zip -u ../../NetLAN-Offline.apk classes.dex
           cd ../..
-          $BUILD_TOOLS/apksigner sign --ks ~/.android/debug.keystore --ks-pass pass:android NetLAN-Offline.apk || true
 
-      - name: Baixar APK
+          # 6. Criar chave de assinatura de debug e assinar o APK
+          keytool -genkey -v -keystore debug.keystore -alias androiddebugkey -storepass android -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android,O=Android,C=US"
+          $BUILD_TOOLS/apksigner sign --ks debug.keystore --ks-pass pass:android NetLAN-Offline.apk
+
+      - name: Disponibilizar APK para Baixar
         uses: actions/upload-artifact@v4
         with:
           name: NetLAN-Offline-App
           path: NetLAN-Offline.apk
-          if-no-files-found: warn
