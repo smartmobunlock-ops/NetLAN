@@ -5,7 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch: # Permite rodar manualmente clicando no botão 'Run workflow'
+  workflow_dispatch: # Permite disparar a compilação com 1 clique manualmente
 
 jobs:
   build:
