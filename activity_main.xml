@@ -14,15 +14,15 @@
         android:textColor="#38bdf8"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="12dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Multiplayer LAN sem Internet via Hotspot"
+        android:text="Multiplayer LAN Offline para Minecraft &amp; Outros"
         android:textColor="#94a3b8"
         android:textSize="12sp"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginBottom="16dp" />
 
     <TextView
         android:id="@+id/text_status"
@@ -30,17 +30,65 @@
         android:layout_height="wrap_content"
         android:text="Status: Desconectado"
         android:textColor="#10b981"
-        android:textSize="14sp"
+        android:textSize="13sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:padding="12dp"
+        android:padding="10dp"
         android:background="#1e293b"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/text_ip_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="IP Padrão Hotspot: 192.168.43.1"
+        android:textColor="#38bdf8"
+        android:textSize="11sp"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Botões de Predefinição de Jogos -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Predefinição Rápida:"
+        android:textColor="#cbd5e1"
+        android:textSize="11sp"
+        android:layout_marginBottom="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <Button
+            android:id="@+id/btn_preset_mc"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="42dp"
+            android:text="Minecraft (19132)"
+            android:textColor="#ffffff"
+            android:textSize="11sp"
+            android:backgroundTint="#059669"
+            android:layout_marginEnd="6dp" />
+
+        <Button
+            android:id="@+id/btn_preset_terraria"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="42dp"
+            android:text="Terraria (7777)"
+            android:textColor="#ffffff"
+            android:textSize="11sp"
+            android:backgroundTint="#475569"
+            android:layout_marginStart="6dp" />
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Porta UDP do Jogo (ex: 7777):"
+        android:text="Porta UDP do Jogo:"
         android:textColor="#cbd5e1"
         android:textSize="12sp" />
 
@@ -48,37 +96,37 @@
         android:id="@+id/edit_game_port"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="7777"
+        android:text="19132"
         android:textColor="#ffffff"
         android:inputType="number"
         android:padding="10dp"
         android:background="#1e293b"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/btn_host"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="CRIAR SALA LAN (MODO HOST - P1)"
+        android:layout_height="52dp"
+        android:text="CRIAR SALA LAN (P1 - ROTEADOR / HOST)"
         android:textColor="#ffffff"
         android:textStyle="bold"
         android:backgroundTint="#0284c7"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="10dp" />
 
     <Button
         android:id="@+id/btn_client"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="CONECTAR À SALA (MODO CLIENTE - P2)"
+        android:layout_height="52dp"
+        android:text="CONECTAR À SALA (P2 - CLIENTE WI-FI)"
         android:textColor="#ffffff"
         android:textStyle="bold"
         android:backgroundTint="#059669"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="12dp" />
 
     <Button
         android:id="@+id/btn_stop"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="48dp"
         android:text="DESCONECTAR"
         android:textColor="#ffffff"
         android:backgroundTint="#e11d48"

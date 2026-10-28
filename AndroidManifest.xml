@@ -2,22 +2,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mistfile.netlan">
 
-    <!-- Permissões de Rede e Wi-Fi -->
+    <!-- Conectividade de Rede e Wi-Fi -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <!-- OBRIGATÓRIO: Permite receber pacotes Broadcast/Multicast no Hotspot sem descarte de bateria -->
+    <!-- OBRIGATÓRIO PARA MINECRAFT: Permite receber pacotes Multicast/Broadcast na LAN -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
-    <!-- Permissões de Segundo Plano -->
+    <!-- Permissões de Segundo Plano e WakeLock -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
         android:icon="@android:drawable/sym_def_app_icon"
         android:label="NetLAN Offline"
+        android:roundIcon="@android:drawable/sym_def_app_icon"
+        android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
 
         <activity
@@ -29,19 +32,21 @@
             </intent-filter>
         </activity>
 
-        <!-- Serviço de VPN Virtual (Captura de Pacotes TUN) -->
+        <!-- Serviço de VPN Virtual (Captura de Tráfego TUN) -->
         <service
             android:name=".LocalLanVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="specialUse"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
         </service>
 
-        <!-- Serviço de Relay UDP Broadcast -->
+        <!-- Serviço de Retransmissão Multicast/Broadcast UDP -->
         <service
             android:name=".LanBroadcastRelay"
+            android:foregroundServiceType="specialUse"
             android:exported="false" />
 
     </application>
